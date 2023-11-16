@@ -32,7 +32,7 @@ int run(const fs::path &in_path, const fs::path &out_path) {
         if (len != 0) {
             printf("codeword of %02x: ", byte);
             for (int i = 0; i < len; i++) {
-                printf("%d", val & 1);
+                printf("%d", int(val & 1));
                 val >>= 1;
             }
             putchar('\n');
