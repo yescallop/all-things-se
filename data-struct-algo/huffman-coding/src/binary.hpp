@@ -19,10 +19,6 @@ u64 count_bytes(std::ifstream &is, std::array<u64, 256> &counters) {
     return len;
 }
 
-// Safe and saturating logical shifts.
-u64 shl(u64 value, u8 count) { return count < 64 ? (value << count) : 0; }
-u64 shr(u64 value, u8 count) { return count < 64 ? (value >> count) : 0; }
-
 class BitWriter {
     std::ofstream os;
     u64 buf = 0;

@@ -94,7 +94,7 @@ u64 build_code(const TreeNodePtr &tree, CodeTable &table, CodeDict &dict) {
         if (node.right_child) {
             node.right_child->level = node.level + 1;
             node.right_child->codeword_val =
-                node.codeword_val | (u64(1) << node.level);
+                node.codeword_val | shl(1, node.level);
             queue.push(node.right_child.get());
         }
 

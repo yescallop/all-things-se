@@ -35,3 +35,7 @@ class PriorityQueue : public std::priority_queue<T, Container, Compare> {
     using std::priority_queue<T, Container, Compare>::c;
     using std::priority_queue<T, Container, Compare>::comp;
 };
+
+// Safe and saturating logical shifts.
+u64 shl(u64 value, u8 count) { return count < 64 ? (value << count) : 0; }
+u64 shr(u64 value, u8 count) { return count < 64 ? (value >> count) : 0; }
