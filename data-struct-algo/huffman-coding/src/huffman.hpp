@@ -6,8 +6,8 @@ using CodewordLen = u8;
 
 // With the maximum length of a Huffman codeword being 63 bits,
 // the maximum file length we can handle is at least
-// Fibonacci(63+3)-1 bytes = 27,777,890,035,287 B = 25.26 TiB,
-// whereas 31 bits allows a mere 5.44 MiB.
+// Fibonacci(63+3)-1 bytes = 27,777,890,035,287 B = 25.2 TiB,
+// whereas 31 bits allows a mere 5,702,886 B = 5.4 MiB.
 //
 // See: Y. S. Abu-Mostafa, R. J. McEliece, Maximal codeword lengths
 // in Huffman codes, Computers & Mathematics with Applications 39
