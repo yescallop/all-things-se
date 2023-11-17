@@ -46,6 +46,13 @@ TreeNodePtr build_tree(const std::array<u64, 256> &weights) {
         if (weights[byte] != 0)
             queue.emplace(byte, weights[byte]);
 
+    if (queue.size() == 1) {
+        TreeNode root;
+        root.left_child = std::make_unique<TreeNode>(queue.top_and_pop());
+        root.weight = root.left_child->weight;
+        queue.emplace(std::move(root));
+    }
+
     while (queue.size() > 1)
         queue.emplace(queue.top_and_pop(), queue.top_and_pop());
 
