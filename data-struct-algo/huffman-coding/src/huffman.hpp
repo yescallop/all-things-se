@@ -16,14 +16,18 @@ const u8 CODEWORD_LEN_BITS = 6;
 
 using CodewordVal = u64;
 
+struct TreeNode;
+
+using TreeNodePtr = std::unique_ptr<TreeNode>;
+
 struct TreeNode {
     u8 byte = 0;
     CodewordLen level = 0;
     u64 weight = 0;
     CodewordVal codeword_val = 0;
 
-    std::unique_ptr<TreeNode> left_child;
-    std::unique_ptr<TreeNode> right_child;
+    TreeNodePtr left_child;
+    TreeNodePtr right_child;
 
     TreeNode() {}
     TreeNode(u8 byte, u64 weight) : byte(byte), weight(weight) {}
@@ -37,8 +41,6 @@ struct TreeNode {
     }
 };
 
-using TreeNodePtr = std::unique_ptr<TreeNode>;
-
 /// Builds a Huffman tree from weights of bytes.
 TreeNodePtr build_tree(const std::array<u64, 256> &weights) {
     PriorityQueue<TreeNode> queue;
@@ -47,9 +49,8 @@ TreeNodePtr build_tree(const std::array<u64, 256> &weights) {
             queue.emplace(byte, weights[byte]);
 
     if (queue.size() == 1) {
-        TreeNode root;
+        TreeNode root(0, queue.top().weight);
         root.left_child = std::make_unique<TreeNode>(queue.top_and_pop());
-        root.weight = root.left_child->weight;
         queue.emplace(std::move(root));
     }
 
