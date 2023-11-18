@@ -110,8 +110,7 @@ u64 build_code(const TreeNodePtr &tree, CodeTable &table, CodeDict &dict) {
             Codeword codeword(node.level, node.codeword_val);
             table[node.byte] = codeword;
 
-            dict.try_emplace(codeword.len)
-                .first->second.emplace_back(codeword.val, node.byte);
+            dict[codeword.len].emplace_back(codeword.val, node.byte);
 
             len += node.weight * codeword.len;
         }
