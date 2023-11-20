@@ -11,6 +11,7 @@
 #include <memory>
 #include <queue>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 
 namespace fs = std::filesystem;

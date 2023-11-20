@@ -3,11 +3,11 @@
 #include "common.hpp"
 #include "huffman.hpp"
 
-/// @brief Counts the occurrences of each byte in an input file stream.
-/// @param is The input file stream to read bytes from.
+/// @brief Counts the occurrences of each byte in an input stream.
+/// @param is The input stream to read bytes from.
 /// @param counters An array of size 256 to store the count of each byte.
-/// @return The total number of bytes in the input file stream.
-u64 count_bytes(std::ifstream &is, std::array<u64, 256> &counters) {
+/// @return The total number of bytes in the input stream.
+u64 count_bytes(std::istream &is, std::array<u64, 256> &counters) {
     counters = {};
     char byte;
     while (is.get(byte))
@@ -19,13 +19,15 @@ u64 count_bytes(std::ifstream &is, std::array<u64, 256> &counters) {
     return len;
 }
 
-class BitWriter {
-    std::ofstream os;
+template <class Os> class BitWriter {
+    static_assert(std::is_base_of<std::ostream, Os>::value);
+
+    Os os;
     u64 buf = 0;
     u8 buf_len = 0;
 
   public:
-    BitWriter(std::ofstream &&os) : os(std::move(os)) {}
+    BitWriter(Os &&os) : os(std::move(os)) {}
 
     ~BitWriter() {
         // Write the remaining bits.
@@ -58,7 +60,7 @@ class BitWriter {
         }
     }
 
-    void write(std::ifstream &is, const CodeTable &table) {
+    void write(std::istream &is, const CodeTable &table) {
         char byte;
         while (is.get(byte)) {
             auto [len, val] = table[u8(byte)];
@@ -67,13 +69,15 @@ class BitWriter {
     }
 };
 
-class BitReader {
-    std::ifstream is;
+template <class Is> class BitReader {
+    static_assert(std::is_base_of<std::istream, Is>::value);
+
+    Is is;
     u64 buf = 0;
     u8 buf_len = 0;
 
   public:
-    BitReader(std::ifstream &&is) : is(std::move(is)) {}
+    BitReader(Is &&is) : is(std::move(is)) {}
 
     bool read(u64 &value, u8 count) {
         if (count > 64)
@@ -121,7 +125,7 @@ class BitReader {
         return true;
     }
 
-    bool read(std::ofstream &os, const TreeNodePtr &tree, u64 msg_len) {
+    bool read(std::ostream &os, const TreeNodePtr &tree, u64 msg_len) {
         for (u64 i = 0; i < msg_len; i++) {
             TreeNode *cur = tree.get();
             while (cur && (cur->left_child || cur->right_child)) {
