@@ -30,6 +30,8 @@ class BitWriter {
     void flush() {
         // Write the remaining bits.
         os->write(reinterpret_cast<char *>(&buf), (buf_len + 7) / 8);
+        buf = 0;
+        buf_len = 0;
     }
 
     void write(u64 value, u8 count) {
