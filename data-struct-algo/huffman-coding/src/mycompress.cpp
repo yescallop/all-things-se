@@ -48,10 +48,11 @@ int run(const fs::path &in_path, const fs::path &out_path) {
         return 1;
     }
 
-    BitWriter bw(std::move(os));
+    BitWriter bw(&os);
     bw.write(dict);
     bw.write(in_len_bytes, 64);
     bw.write(is, table);
+    bw.flush();
 
     return 0;
 }

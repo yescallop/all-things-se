@@ -47,11 +47,10 @@ TreeNodePtr build_tree(const std::array<u64, 256> &weights) {
         if (weights[byte] != 0)
             queue.emplace(byte, weights[byte]);
 
-    if (queue.size() == 1) {
-        TreeNode root(0, queue.top().weight);
-        root.left_child = std::make_unique<TreeNode>(queue.top_and_pop());
-        queue.push(std::move(root));
-    }
+    // When the input bytes are of the same value,
+    // special handling is not needed because they are
+    // effectively assigned a codeword of length 0,
+    // which is decoded normally just as any other cases.
 
     while (queue.size() > 1)
         queue.emplace(queue.top_and_pop(), queue.top_and_pop());

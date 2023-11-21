@@ -19,19 +19,17 @@ u64 count_bytes(std::istream &is, std::array<u64, 256> &counters) {
     return len;
 }
 
-template <class Os> class BitWriter {
-    static_assert(std::is_base_of<std::ostream, Os>::value);
-
-    Os os;
+class BitWriter {
+    std::ostream *os;
     u64 buf = 0;
     u8 buf_len = 0;
 
   public:
-    BitWriter(Os &&os) : os(std::move(os)) {}
+    BitWriter(std::ostream *os) : os(os) {}
 
-    ~BitWriter() {
+    void flush() {
         // Write the remaining bits.
-        os.write(reinterpret_cast<char *>(&buf), (buf_len + 7) / 8);
+        os->write(reinterpret_cast<char *>(&buf), (buf_len + 7) / 8);
     }
 
     void write(u64 value, u8 count) {
@@ -42,7 +40,7 @@ template <class Os> class BitWriter {
         buf_len += count;
 
         if (buf_len >= 64) {
-            os.write(reinterpret_cast<char *>(&buf), 8);
+            os->write(reinterpret_cast<char *>(&buf), 8);
             buf_len -= 64;
             buf = shr(value, count - buf_len);
         }
@@ -67,15 +65,13 @@ template <class Os> class BitWriter {
     }
 };
 
-template <class Is> class BitReader {
-    static_assert(std::is_base_of<std::istream, Is>::value);
-
-    Is is;
+class BitReader {
+    std::istream *is;
     u64 buf = 0;
     u8 buf_len = 0;
 
   public:
-    BitReader(Is &&is) : is(std::move(is)) {}
+    BitReader(std::istream *is) : is(is) {}
 
     bool read(u64 &value, u8 count) {
         if (count > 64)
@@ -88,8 +84,8 @@ template <class Is> class BitReader {
             u64 lo = buf & (shl(1, lo_len) - 1);
             count -= lo_len;
 
-            is.read(reinterpret_cast<char *>(&buf), 8);
-            buf_len = is.gcount() * 8;
+            is->read(reinterpret_cast<char *>(&buf), 8);
+            buf_len = is->gcount() * 8;
             if (count > buf_len)
                 return false;
 

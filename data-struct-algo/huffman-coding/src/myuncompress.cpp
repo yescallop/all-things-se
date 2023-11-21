@@ -13,7 +13,7 @@ int run(const fs::path &in_path, const fs::path &out_path) {
         return 1;
     }
 
-    BitReader br(std::move(is));
+    BitReader br(&is);
 
     CodeDict dict;
     if (!br.read(dict)) {
@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
     fs::path in_path = argv[1], out_path = argv[argc - 1];
     if (argc == 2) {
         if (in_path.extension() != ".huff") {
-            fprintf(stderr, ERR_UNKNOWN_EXTENSION);
+            fputs(ERR_UNKNOWN_EXTENSION, stderr);
             return 1;
         }
         out_path.replace_extension("");
