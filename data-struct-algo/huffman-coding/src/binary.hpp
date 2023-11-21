@@ -50,13 +50,11 @@ template <class Os> class BitWriter {
 
     void write(const CodeDict &dict) {
         write(dict.size(), CODEWORD_LEN_BITS);
-        for (auto &[len, vec] : dict) {
+        for (auto &[len, bytes] : dict) {
             write(len, CODEWORD_LEN_BITS);
-            write(vec.size(), 8);
-            for (auto [val, byte] : vec) {
-                write(val, len);
+            write(bytes.size(), 8);
+            for (u8 byte : bytes)
                 write(byte, 8);
-            }
         }
     }
 
@@ -110,16 +108,16 @@ template <class Is> class BitReader {
             return false;
 
         for (int i = 0; i < dict_len; i++) {
-            u64 len, vec_len;
-            if (!read(len, CODEWORD_LEN_BITS) || !read(vec_len, 8))
+            u64 len, bytes_cnt;
+            if (!read(len, CODEWORD_LEN_BITS) || !read(bytes_cnt, 8))
                 return false;
 
-            auto &vec = dict.try_emplace(len, vec_len).first->second;
-            for (int j = 0; j < vec_len; j++) {
-                u64 val, byte;
-                if (!read(val, len) || !read(byte, 8))
+            auto &bytes = dict.try_emplace(len, bytes_cnt).first->second;
+            for (int j = 0; j < bytes_cnt; j++) {
+                u64 byte;
+                if (!read(byte, 8))
                     return false;
-                vec[j] = {val, u8(byte)};
+                bytes[j] = u8(byte);
             }
         }
         return true;

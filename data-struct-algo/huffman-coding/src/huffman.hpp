@@ -24,7 +24,6 @@ struct TreeNode {
     u8 byte = 0;
     CodewordLen level = 0;
     u64 weight = 0;
-    CodewordVal codeword_val = 0;
 
     TreeNodePtr left_child;
     TreeNodePtr right_child;
@@ -51,7 +50,7 @@ TreeNodePtr build_tree(const std::array<u64, 256> &weights) {
     if (queue.size() == 1) {
         TreeNode root(0, queue.top().weight);
         root.left_child = std::make_unique<TreeNode>(queue.top_and_pop());
-        queue.emplace(std::move(root));
+        queue.push(std::move(root));
     }
 
     while (queue.size() > 1)
@@ -69,12 +68,29 @@ struct Codeword {
 
 using CodeTable = std::array<Codeword, 256>;
 
-struct CodewordValAndByte {
-    CodewordVal codeword_val = 0;
-    u8 byte = 0;
-};
+using CodeDict = std::map<CodewordLen, std::vector<u8>>;
 
-using CodeDict = std::map<CodewordLen, std::vector<CodewordValAndByte>>;
+class CanonicalCodeBuilder {
+    CodewordLen last_len = 0;
+    CodewordVal val_rev = 0;
+
+    static CodewordVal reverse_bits(CodewordVal v, CodewordLen len) {
+        CodewordVal res = 0;
+        for (int i = 0; i < len; i++) {
+            res = (res << 1) | (v & 1);
+            v >>= 1;
+        }
+        return res;
+    }
+
+  public:
+    CodewordVal next(CodewordLen len) {
+        if (last_len != 0)
+            val_rev = shl(val_rev + 1, len - last_len);
+        last_len = len;
+        return reverse_bits(val_rev, len);
+    }
+};
 
 /// @brief Builds a Huffman code from a Huffman tree.
 /// @param tree The input Huffman tree.
@@ -89,28 +105,27 @@ u64 build_code(const TreeNodePtr &tree, CodeTable &table, CodeDict &dict) {
     queue.push(tree.get());
 
     u64 len = 0;
+    CanonicalCodeBuilder cb;
+
     while (!queue.empty()) {
         TreeNode &node = *queue.front();
         queue.pop();
 
         if (node.left_child) {
             node.left_child->level = node.level + 1;
-            node.left_child->codeword_val = node.codeword_val;
             queue.push(node.left_child.get());
         }
 
         if (node.right_child) {
             node.right_child->level = node.level + 1;
-            node.right_child->codeword_val =
-                node.codeword_val | shl(1, node.level);
             queue.push(node.right_child.get());
         }
 
         if (!node.left_child && !node.right_child) {
-            Codeword codeword(node.level, node.codeword_val);
+            Codeword codeword(node.level, cb.next(node.level));
             table[node.byte] = codeword;
 
-            dict[codeword.len].emplace_back(codeword.val, node.byte);
+            dict[codeword.len].push_back(node.byte);
 
             len += node.weight * codeword.len;
         }
@@ -124,9 +139,13 @@ TreeNodePtr build_tree(const CodeDict &dict) {
         return nullptr;
 
     TreeNodePtr tree = std::make_unique<TreeNode>();
-    for (auto &[len, vec] : dict) {
-        for (auto [val, byte] : vec) {
+    CanonicalCodeBuilder cb;
+
+    for (auto &[len, bytes] : dict) {
+        for (u8 byte : bytes) {
             TreeNode *cur = tree.get();
+            CodewordVal val = cb.next(len);
+
             for (int i = 0; i < len; i++) {
                 if ((val & 1) == 0) {
                     if (!cur->left_child)
