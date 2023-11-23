@@ -50,8 +50,7 @@ int run(const fs::path &in_path, const fs::path &out_path) {
 
     BitWriter bw(&os);
     bw.write(store);
-    bw.write(in_len_bytes, 64);
-    bw.write(is, table);
+    bw.write(is, table, in_len_bytes);
     bw.flush();
 
     return 0;

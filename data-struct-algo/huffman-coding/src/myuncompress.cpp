@@ -23,12 +23,6 @@ int run(const fs::path &in_path, const fs::path &out_path) {
 
     TreeNodePtr tree = build_tree(store);
 
-    u64 msg_len;
-    if (!br.read(msg_len, 64)) {
-        fprintf(stderr, ERR_FAILED, "read message length");
-        return 1;
-    }
-
     std::ofstream os(out_path, ios::binary | ios::trunc);
 
     if (!os) {
@@ -36,7 +30,7 @@ int run(const fs::path &in_path, const fs::path &out_path) {
         return 1;
     }
 
-    if (!br.read(os, tree, msg_len)) {
+    if (!br.read(os, tree)) {
         fprintf(stderr, ERR_FAILED, "read message");
         return 1;
     }

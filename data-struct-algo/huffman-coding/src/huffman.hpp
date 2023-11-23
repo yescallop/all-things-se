@@ -12,7 +12,7 @@ using CodewordLen = u8;
 // See: Y. S. Abu-Mostafa, R. J. McEliece, Maximal codeword lengths
 // in Huffman codes, Computers & Mathematics with Applications 39
 // (2000), no. 11, 129-134.
-const u8 CODEWORD_LEN_BITS = 6;
+const u8 CODEWORD_LEN_WIDTH = 6;
 
 using CodewordVal = u64;
 

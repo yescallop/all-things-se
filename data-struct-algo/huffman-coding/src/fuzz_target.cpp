@@ -40,8 +40,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
     BitWriter bw(&ss);
     bw.write(store);
-    bw.write(in_len_bytes, 64);
-    bw.write(is, table);
+    bw.write(is, table, in_len_bytes);
     bw.flush();
 
     ss.seekg(0);
@@ -54,14 +53,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
     TreeNodePtr tree_read = build_tree(store);
 
-    u64 msg_len;
-    if (!br.read(msg_len, 64))
-        throw std::logic_error("failed to read msg len");
-
     std::string_view data_view((const char *)Data, Size);
 
     std::ostringstream os;
-    if (!br.read(os, tree_read, msg_len) || os.view() != data_view)
+    if (!br.read(os, tree_read) || os.view() != data_view)
         throw std::logic_error("wrong msg");
 
     return 0;

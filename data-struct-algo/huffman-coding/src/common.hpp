@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <bit>
 #include <cinttypes>
 #include <cstdint>
 #include <cstdio>
@@ -37,6 +38,9 @@ class PriorityQueue : public std::priority_queue<T, Container, Compare> {
     using std::priority_queue<T, Container, Compare>::comp;
 };
 
-// Safe and saturating logical shifts.
+/* Safe and saturating logical shifts */
 u64 shl(u64 value, u8 count) { return count < 64 ? (value << count) : 0; }
 u64 shr(u64 value, u8 count) { return count < 64 ? (value >> count) : 0; }
+
+/// Extracts the lowest `count` bits from `value`.
+u64 extract_lo(u64 value, u8 count) { return value & (shl(1, count) - 1); }
