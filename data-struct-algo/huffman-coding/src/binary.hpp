@@ -48,9 +48,9 @@ class BitWriter {
         }
     }
 
-    void write(const CodeDict &dict) {
-        write(dict.size(), CODEWORD_LEN_BITS);
-        for (auto &[len, bytes] : dict) {
+    void write(const CodeStore &store) {
+        write(store.size(), CODEWORD_LEN_BITS);
+        for (auto &[len, bytes] : store) {
             write(len, CODEWORD_LEN_BITS);
             write(bytes.size(), 8);
             for (u8 byte : bytes)
@@ -100,17 +100,17 @@ class BitReader {
         return true;
     }
 
-    bool read(CodeDict &dict) {
-        u64 dict_len;
-        if (!read(dict_len, CODEWORD_LEN_BITS))
+    bool read(CodeStore &store) {
+        u64 store_len;
+        if (!read(store_len, CODEWORD_LEN_BITS))
             return false;
 
-        for (int i = 0; i < dict_len; i++) {
+        for (int i = 0; i < store_len; i++) {
             u64 len, bytes_cnt;
             if (!read(len, CODEWORD_LEN_BITS) || !read(bytes_cnt, 8))
                 return false;
 
-            auto &bytes = dict.try_emplace(len, bytes_cnt).first->second;
+            auto &bytes = store.try_emplace(len, bytes_cnt).first->second;
             for (int j = 0; j < bytes_cnt; j++) {
                 u64 byte;
                 if (!read(byte, 8))

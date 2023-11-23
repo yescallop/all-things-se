@@ -66,8 +66,7 @@ struct Codeword {
 };
 
 using CodeTable = std::array<Codeword, 256>;
-
-using CodeDict = std::map<CodewordLen, std::vector<u8>>;
+using CodeStore = std::map<CodewordLen, std::vector<u8>>;
 
 class CanonicalCodeBuilder {
     CodewordLen last_len = 0;
@@ -94,9 +93,9 @@ class CanonicalCodeBuilder {
 /// @brief Builds a Huffman code from a Huffman tree.
 /// @param tree The input Huffman tree.
 /// @param table An array to store the Huffman code.
-/// @param dict A map to store the Huffman code, sorted by codeword length.
+/// @param store A map to store the Huffman code, sorted by codeword length.
 /// @return The encoded message length in bits.
-u64 build_code(const TreeNodePtr &tree, CodeTable &table, CodeDict &dict) {
+u64 build_code(const TreeNodePtr &tree, CodeTable &table, CodeStore &store) {
     if (!tree)
         return 0;
 
@@ -124,7 +123,7 @@ u64 build_code(const TreeNodePtr &tree, CodeTable &table, CodeDict &dict) {
             Codeword codeword(node.level, cb.next(node.level));
             table[node.byte] = codeword;
 
-            dict[codeword.len].push_back(node.byte);
+            store[codeword.len].push_back(node.byte);
 
             len += node.weight * codeword.len;
         }
@@ -132,15 +131,15 @@ u64 build_code(const TreeNodePtr &tree, CodeTable &table, CodeDict &dict) {
     return len;
 }
 
-/// Builds a Huffman tree from a `CodeDict`.
-TreeNodePtr build_tree(const CodeDict &dict) {
-    if (dict.empty())
+/// Builds a Huffman tree from a `CodeStore`.
+TreeNodePtr build_tree(const CodeStore &store) {
+    if (store.empty())
         return nullptr;
 
     TreeNodePtr tree = std::make_unique<TreeNode>();
     CanonicalCodeBuilder cb;
 
-    for (auto &[len, bytes] : dict) {
+    for (auto &[len, bytes] : store) {
         for (u8 byte : bytes) {
             TreeNode *cur = tree.get();
             CodewordVal val = cb.next(len);

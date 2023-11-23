@@ -24,8 +24,8 @@ int run(const fs::path &in_path, const fs::path &out_path) {
     TreeNodePtr tree = build_tree(weights);
 
     CodeTable table;
-    CodeDict dict;
-    u64 encoded_len_bits = build_code(tree, table, dict);
+    CodeStore store;
+    u64 encoded_len_bits = build_code(tree, table, store);
 
     for (int byte = 0; byte < 256; byte++) {
         auto [len, val] = table[byte];
@@ -49,7 +49,7 @@ int run(const fs::path &in_path, const fs::path &out_path) {
     }
 
     BitWriter bw(&os);
-    bw.write(dict);
+    bw.write(store);
     bw.write(in_len_bytes, 64);
     bw.write(is, table);
     bw.flush();

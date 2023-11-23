@@ -35,11 +35,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
     TreeNodePtr tree = build_tree(weights);
 
     CodeTable table;
-    CodeDict dict;
-    build_code(tree, table, dict);
+    CodeStore store;
+    build_code(tree, table, store);
 
     BitWriter bw(&ss);
-    bw.write(dict);
+    bw.write(store);
     bw.write(in_len_bytes, 64);
     bw.write(is, table);
     bw.flush();
@@ -48,11 +48,11 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
     BitReader br(&ss);
 
-    CodeDict dict_read;
-    if (!br.read(dict_read))
-        throw std::logic_error("failed to read dict");
+    CodeStore store_read;
+    if (!br.read(store_read))
+        throw std::logic_error("failed to read store");
 
-    TreeNodePtr tree_read = build_tree(dict);
+    TreeNodePtr tree_read = build_tree(store);
 
     u64 msg_len;
     if (!br.read(msg_len, 64))

@@ -15,13 +15,13 @@ int run(const fs::path &in_path, const fs::path &out_path) {
 
     BitReader br(&is);
 
-    CodeDict dict;
-    if (!br.read(dict)) {
+    CodeStore store;
+    if (!br.read(store)) {
         fprintf(stderr, ERR_FAILED, "read Huffman code");
         return 1;
     }
 
-    TreeNodePtr tree = build_tree(dict);
+    TreeNodePtr tree = build_tree(store);
 
     u64 msg_len;
     if (!br.read(msg_len, 64)) {
