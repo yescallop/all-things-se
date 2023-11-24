@@ -62,9 +62,9 @@ class BitWriter {
     }
 
     void write(std::istream &is, const CodeTable &table, u64 msg_len) {
-        u8 msg_len_width = std::bit_width(msg_len);
-        write(msg_len_width, 6);
-        write(msg_len, msg_len_width);
+        u8 msg_len_nibbles = (std::bit_width(msg_len) + 3) / 4;
+        write(msg_len_nibbles, 4);
+        write(msg_len, msg_len_nibbles * 4);
 
         char byte;
         while (is.get(byte)) {
@@ -132,8 +132,8 @@ class BitReader {
     }
 
     bool read(std::ostream &os, const TreeNodePtr &tree) {
-        u64 msg_len_width, msg_len;
-        if (!read(msg_len_width, 6) || !read(msg_len, msg_len_width))
+        u64 msg_len_nibbles, msg_len;
+        if (!read(msg_len_nibbles, 4) || !read(msg_len, msg_len_nibbles * 4))
             return false;
 
         for (u64 i = 0; i < msg_len; i++) {
