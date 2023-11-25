@@ -112,20 +112,27 @@ class BitReader {
         if (!read(store_len, CODEWORD_LEN_WIDTH))
             return false;
 
+        u64 last_len = 0;
         for (int i = 0; i < store_len; i++) {
             u64 len, bytes_of_len;
             if (!read(len, CODEWORD_LEN_WIDTH) || !read(bytes_of_len, 8))
                 return false;
+
+            // Ensure that the lengths are in ascending order.
+            if (len < last_len)
+                return false;
+            last_len = len;
+
             // Correct the possibly wrapped value.
             if (bytes_of_len == 0)
                 bytes_of_len = 256;
 
-            auto &bytes = store.try_emplace(len, bytes_of_len).first->second;
+            std::vector<u8> &bytes = store[len];
             for (int j = 0; j < bytes_of_len; j++) {
                 u64 byte;
                 if (!read(byte, 8))
                     return false;
-                bytes[j] = u8(byte);
+                bytes.push_back(u8(byte));
             }
         }
         return true;
