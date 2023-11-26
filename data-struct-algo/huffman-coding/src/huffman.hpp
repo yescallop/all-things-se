@@ -4,7 +4,7 @@
 
 using CodewordLen = u8;
 
-// With the upper bound of codeword lengths being 63 bits,
+// With the upper bound of codeword length being 63 bits,
 // we are able to compress any file with a size of at most
 // Fibonacci(63+3)-1 bytes = 27,777,890,035,287 B = 25.2 TiB,
 // whereas 31 bits allows a mere 5,702,886 B = 5.4 MiB.
